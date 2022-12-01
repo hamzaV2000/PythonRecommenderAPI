@@ -72,7 +72,7 @@ def get_recommendations(title="empty", domain=0):
 
 
 def get_recommendationsByAuthor(author="empty", n=5):
-    # from sklearn.metrics.pairwise import  linear_kernel
+    print("Books for " + author)
     df = pd.read_csv('books.csv')
     df = df[df["author"] == author]
     return Response(df.nlargest(n, 'numRatings')[["title", "genres", "coverImg", "rating"]].to_json(orient="records"),
