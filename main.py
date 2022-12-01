@@ -26,7 +26,7 @@ class RecommendByAuthor(Resource):
 
 def get_recommendations(title="empty", domain=0):
     # from sklearn.metrics.pairwise import  linear_kernel
-    df = pd.read_csv('books.csv').head((domain + 1) * 500)
+    df = pd.read_csv('books.csv', skiprows=[1, domain * 500]).head((domain + 1) * 500)
     # Replace NaN with an empty string
     df['description'] = df['description'].fillna('')
 
