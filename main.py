@@ -72,6 +72,7 @@ def get_recommendationsByAuthor(author="empty", n=5):
 
 
 def get_topN(n):
+    print("Top ", n, " books")
     df = pd.read_csv('books.csv')
     return Response(df.nlargest(n, 'numRatings').to_json(orient="records"),
                     mimetype='application/json')
