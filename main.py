@@ -8,54 +8,45 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 warnings.filterwarnings('ignore')
 
-
-class RecommendBySimilarBooks(Resource):
-    def get(self, title, domain=0):
-        return get_recommendations(title, domain)
-
-
-class MostRated(Resource):
-    def get(self, n):
-        return get_topN(n)
+# ##############################################################################################################################
+dff = pd.read_csv('books.csv')
+dff.drop_duplicates(subset=['title'])
 
 
-class RecommendByAuthor(Resource):
-    def get(self, author, n):
-        return get_recommendationsByAuthor(author, n)
-
-
-def get_recommendations(title="empty", domain=0):
+def get_recommendationsByBookTitle(title="empty", domain=1):
+    print(title, ((domain - 1) * 500), ((domain + 1) * 500))
     # from sklearn.metrics.pairwise import  linear_kernel
-    df = pd.read_csv('books.csv', skiprows=[1, domain * 500]).head((domain + 1) * 500)
-    # Replace NaN with an empty string
+    print(domain)
+    if dff[dff['title'] == title].shape[0] == 0:
+        return "no such title"
+    df = pd.DataFrame(dff[(domain - 1) * 500: (domain + 1) * 500])
     df['description'] = df['description'].fillna('')
-
+    df = df.reset_index(drop=True)
     indices = pd.Series(df.index, index=df['title']).drop_duplicates()
-    print(title)
     idx = ""
     try:
         idx = indices[title]
     except:
-        if (domain + 1) * 500 < 52000:
-            return get_recommendations(title, domain + 1)
+        if (domain + 1) * 500 < 52500:
+            return get_recommendationsByBookTitle(title, domain + 1)
         else:
-            return "not found"
-
+            return "no more books"
+    print("before tokenizing...........................")
     # Create a Tfidf Vectorizer and Remove stopwords
     tfidf = TfidfVectorizer(stop_words='english')
     # Fit and transform the data to a tfidf matrix
-    tfidf_matrix = tfidf.fit_transform(df['genres'])
-
+    tfidf_matrix = tfidf.fit_transform(df['description'])
+    print("after tokenizing.............................")
     # Print the shape of the tfidf_matrix
     print(tfidf_matrix.shape)
-
-    # Compute the cosine similarity between each movie description
-    # cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+    print("before cosine")
     cosine_sim2 = cosine_similarity(tfidf_matrix, tfidf_matrix)
-    # Get the pairwise similarity scores of all movies with that movie
-    sim_scores = list(enumerate(cosine_sim2[idx]))
-    # Sort the movies based on the similarity scores
+    print("after cosine")
 
+    print(idx)
+    sim_scores = list(enumerate(cosine_sim2[idx]))
+
+    print("after enumeration")
     try:
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     except ValueError:
@@ -67,7 +58,8 @@ def get_recommendations(title="empty", domain=0):
     movie_indices = [i[0] for i in top_similar]
     # Return the top 10 most similar movies
     print("Returning Recommendations")
-    return Response(df.iloc[movie_indices][["title", "genres", "coverImg"]].to_json(orient="records"),
+
+    return Response(df.iloc[movie_indices].to_json(orient="records"),
                     mimetype='application/json')
 
 
@@ -83,6 +75,22 @@ def get_topN(n):
     df = pd.read_csv('books.csv')
     return Response(df.nlargest(n, 'numRatings')[["title", "genres", "coverImg", "rating"]].to_json(orient="records"),
                     mimetype='application/json')
+
+
+# #############################################################################################################################
+class RecommendBySimilarBooks(Resource):
+    def get(self, title, domain):
+        return get_recommendationsByBookTitle(title, domain)
+
+
+class MostRated(Resource):
+    def get(self, n):
+        return get_topN(n)
+
+
+class RecommendByAuthor(Resource):
+    def get(self, author, n):
+        return get_recommendationsByAuthor(author, n)
 
 
 app = Flask(__name__)
