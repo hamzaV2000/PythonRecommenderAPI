@@ -71,6 +71,15 @@ def get_recommendationsByAuthor(author="empty", n=5):
                     mimetype='application/json')
 
 
+def get_recommendationsByGenre(genre="empty", n=5):
+    print("Books for " + genre)
+    df = pd.read_csv('books.csv')
+    df = df[df["genres"].str.contains(genre)]
+
+    return Response(df.nlargest(n, 'numRatings').to_json(orient="records"),
+                    mimetype='application/json')
+
+
 def get_topN(n):
     print("Top ", n, " books")
     df = pd.read_csv('books.csv')
@@ -94,10 +103,17 @@ class RecommendByAuthor(Resource):
         return get_recommendationsByAuthor(author, n)
 
 
+class RecommendByGenre(Resource):
+    def get(self, genre, n):
+        return get_recommendationsByGenre(genre, n)
+
+
 app = Flask(__name__)
 api = Api(app)
 api.add_resource(RecommendBySimilarBooks, "/recommendBySimilarBooks/<string:title>/<int:domain>")
 api.add_resource(RecommendByAuthor, "/recommendByAuthor/<string:author>/<int:n>")
+api.add_resource(RecommendByGenre, "/recommendByGenre/<string:genre>/<int:n>")
 api.add_resource(MostRated, "/mostRated/<int:n>")
+
 if __name__ == "__main__":
     app.run(debug=True)
