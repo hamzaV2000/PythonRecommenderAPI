@@ -67,7 +67,7 @@ def get_recommendationsByAuthor(author="empty", n=5):
     print("Books for " + author)
     df = pd.read_csv('books.csv')
     df = df[df["author"] == author]
-    return Response(df.nlargest(n, 'numRatings')[["title", "genres", "coverImg", "rating"]].to_json(orient="records"),
+    return Response(df.nlargest(n, 'numRatings').to_json(orient="records"),
                     mimetype='application/json')
 
 
