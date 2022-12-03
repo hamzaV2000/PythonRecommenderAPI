@@ -1,5 +1,6 @@
 import warnings
 
+from flask_cors import CORS, cross_origin
 import pandas as pd
 from flask_restful import Api, Resource
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -110,6 +111,7 @@ class RecommendByGenre(Resource):
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 api.add_resource(RecommendBySimilarBooks, "/recommendBySimilarBooks/<string:title>/<int:domain>")
 api.add_resource(RecommendByAuthor, "/recommendByAuthor/<string:author>/<int:n>")
 api.add_resource(RecommendByGenre, "/recommendByGenre/<string:genre>/<int:n>")
