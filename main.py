@@ -35,7 +35,7 @@ def get_recommendationsByBookTitle(title="empty", domain=1):
     # Create a Tfidf Vectorizer and Remove stopwords
     tfidf = TfidfVectorizer(stop_words='english')
     # Fit and transform the data to a tfidf matrix
-    tfidf_matrix = tfidf.fit_transform(df['description'])
+    tfidf_matrix = tfidf.fit_transform(df['description'] + df['genres'])
     print("after tokenizing.............................")
     # Print the shape of the tfidf_matrix
     print(tfidf_matrix.shape)
