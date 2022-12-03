@@ -116,4 +116,4 @@ api.add_resource(RecommendByGenre, "/recommendByGenre/<string:genre>/<int:n>")
 api.add_resource(MostRated, "/mostRated/<int:n>")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)
