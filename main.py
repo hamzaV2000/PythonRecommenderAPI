@@ -10,7 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 warnings.filterwarnings('ignore')
 
 # ##############################################################################################################################
-dff = pd.read_csv('books.csv')
+dff = pd.read_csv('books.csv', low_memory=True)
 dff.drop_duplicates(subset=['title'])
 
 
@@ -22,6 +22,7 @@ def get_recommendationsByBookTitle(title="empty", domain=1):
         return "no such title"
     df = pd.DataFrame(dff[(domain - 1) * 500: (domain + 1) * 500])
     df['description'] = df['description'].fillna('')
+    df['genres'] = df['genres'].fillna('')
     df = df.reset_index(drop=True)
     indices = pd.Series(df.index, index=df['title']).drop_duplicates()
     idx = ""
@@ -66,25 +67,25 @@ def get_recommendationsByBookTitle(title="empty", domain=1):
 
 def get_recommendationsByAuthor(author="empty", n=5):
     print("Books for " + author)
-    df = pd.read_csv('books.csv')
-    df = df[df["author"] == author]
-    return Response(df.nlargest(n, 'numRatings').to_json(orient="records"),
+    # df = pd.DataFrame(dff)
+    # df = df[df["author"] == author]
+    return Response(dff[dff["author"] == author].nlargest(n, 'numRatings').to_json(orient="records"),
                     mimetype='application/json')
 
 
 def get_recommendationsByGenre(genre="empty", n=5):
     print("Books for " + genre)
-    df = pd.read_csv('books.csv')
-    df = df[df["genres"].str.contains(genre)]
+    # df = pd.DataFrame(dff)
+    # df = df[df["genres"].str.contains(genre)]
 
-    return Response(df.nlargest(n, 'numRatings').to_json(orient="records"),
+    return Response(dff[dff["genres"].str.contains(genre)].nlargest(n, 'numRatings').to_json(orient="records"),
                     mimetype='application/json')
 
 
 def get_topN(n):
     print("Top ", n, " books")
-    df = pd.read_csv('books.csv')
-    return Response(df.nlargest(n, 'numRatings').to_json(orient="records"),
+    # df = pd.read_csv('books.csv')
+    return Response(dff.nlargest(n, 'numRatings').to_json(orient="records"),
                     mimetype='application/json')
 
 
