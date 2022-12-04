@@ -6,6 +6,7 @@ from flask_restful import Api, Resource
 from sklearn.feature_extraction.text import TfidfVectorizer
 from flask import Flask, Response
 from sklearn.metrics.pairwise import cosine_similarity
+from gevent.pywsgi import WSGIServer
 
 warnings.filterwarnings('ignore')
 
@@ -119,4 +120,7 @@ api.add_resource(RecommendByGenre, "/recommendByGenre/<string:genre>/<int:n>")
 api.add_resource(MostRated, "/mostRated/<int:n>")
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    http_server = WSGIServer(('0.0.0.0', 5001), app)
+    http_server.serve_forever()
+    # app.run(debug=True, host='0.0.0.0', port=5001)
+
